@@ -13,13 +13,35 @@ namespace WindowsServiceFileMover
 {
     public partial class FileMoverWinService : ServiceBase
     {
-       
+
+        private readonly string sourcePath = @"C:\Folder1";
+        private readonly string destinationPath = @"C:\Folder2";
+        private readonly string logDirectory = @"C:\FileMoverLog";
+
+
         public FileMoverWinService()
         {
             InitializeComponent();
-            
+            SetupService();
+
+
         }
 
+        private void SetupService()
+        {
+            DoesDirectoryExists(sourcePath);
+            DoesDirectoryExists(destinationPath);
+            DoesDirectoryExists(logDirectory);
+        }
+
+        private void DoesDirectoryExists(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+                
+            }
+        }
 
         protected override void OnStart(string[] args)
         {
