@@ -13,7 +13,7 @@ namespace WindowsServiceFileMover
 {
     public partial class FileMoverWinService : ServiceBase
     {
-
+        private FileSystemWatcher _watcher;
         private readonly string sourcePath = @"C:\Folder1";
         private readonly string destinationPath = @"C:\Folder2";
         private readonly string logDirectory = @"C:\FileMoverLog";
@@ -32,6 +32,37 @@ namespace WindowsServiceFileMover
             DoesDirectoryExists(sourcePath);
             DoesDirectoryExists(destinationPath);
             DoesDirectoryExists(logDirectory);
+
+            // Setup Logging in Event Viewer
+            ((ISupportInitialize)this.EventLog).BeginInit();
+            if (!EventLog.SourceExists(this.ServiceName))
+            {
+                EventLog.CreateEventSource(this.ServiceName, "Application");
+            }
+            ((ISupportInitialize)this.EventLog).EndInit();
+
+            this.EventLog.Source = this.ServiceName;
+            this.EventLog.Log = "Application";
+
+
+            SetupFileSystemWatcher();
+        }
+
+        private void SetupFileSystemWatcher()
+        {
+            _watcher = new FileSystemWatcher(sourcePath)
+            {
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite,
+                Filter = "*.*"
+            };
+            _watcher.Created += OnCreated;
+
+
+        }
+
+        private void OnCreated(object sender, FileSystemEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void DoesDirectoryExists(string path)
